@@ -1,0 +1,29 @@
+version: "3"
+
+networks:
+  grafana-loki-net:
+
+services:
+  loki:
+    image: docker.io/grafana/loki:latest
+    volumes:
+      - ./loki/data:/tmp/loki:U # DATA DIR
+      - ./loki/loki-local-config.yaml:/mnt/config/loki-local-config.yaml:U # CONFIG
+    ports:
+      - "3100:3100"
+    command: --config.file=/mnt/config/loki-local-config.yaml
+    networks:
+      - grafana-loki-net
+
+  grafana:
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    image: docker.io/grafana/grafana:latest
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:U # INIT SCRIPT
+      - ./grafana/data:/var/lib/grafana:U # DATA DIR
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:U # DATA SOURCE CONFIG
+    ports:
+      - "3000:3000"
+    networks:
+      - grafana-loki-net
